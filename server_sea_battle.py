@@ -1,4 +1,5 @@
 from random import randint
+from Actions.IActions import *
 import os
 import socket
 import json
@@ -11,13 +12,19 @@ class Server:
     def __init__(self):
         global users
         global threads
+        self.action={
+        "Init_Ship":pickle.dumps(Init_Ship()),
+        "Turn":pickle.dumps(Turn()),
+        "Miss":pickle.dumps(Miss()),
+        "Hit":pickle.dumps(Hit()),
+        "Win":pickle.dumps(Win()),
+        "Lose":pickle.dumps(Lose()),
+        "Error":pickle.dumps(Error())
+        }
         #Settings Variables
-        self.row_size = 9 #number of rows
-        self.col_size = 9 #number of columns
-        self.num_turns = 40
         #Create lists
         self.ship_list = []
-        self.board = [self.row_size*self.col_size]
+
         HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
         PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
@@ -26,7 +33,7 @@ class Server:
         sock.listen(5)
         index=0
         flag=True
-        while index<4: 
+        while index<2: 
             conn, addr = sock.accept()
             print('Connected by', addr)
             user={
@@ -42,26 +49,17 @@ class Server:
             threads.append(t)
             t.start()
 
-#Functions
-    def print_board(self,board_array):
-        pass
-
-
-
-
-
-
-# Create the ships
 
     def init_game_board(self,conn):
         flag=True
         while flag:
-            conn.send("give me your ships");
+            conn.send(self.action["Init_Ship"])
             try:         
-                ship_array =pickle.loads( conn.recv(1024))
+                ship_array=pickle.loads(conn.recv(1024))
                 flag = False
                 for i in ship_array:
-                    print(i)
+                    print(type(i))
+
                     if i<=9 or i>100 or (i>9 and i%10==0):
                         print("fail")
                         flag=True
@@ -69,7 +67,7 @@ class Server:
                 
             except:
                 flag=True
-                conn.send("noob error wrong type")
+                conn.send(self.action["Error"])
         return ship_array
 
     def recv_data(self,sock):
@@ -83,51 +81,53 @@ class Server:
             
 
     def in_game(self,sock,List,sock2,List2):
+   
         print("\n \n",List,List2)
         while len(List)!=0 and len(List2)!=0:
             flag=False
-            sock.send("your turn")
+            
+            sock.send(self.action["Turn"])
+
             data=int(self.recv_data(sock))
             for i in List2:
                 if data==i:
                     flag=True
-                    sock.send("hit")
+                   
+                    sock.send(self.action["Hit"])
                     break
             if flag:
                 print("\n list 2 is :",List2)
                 List2.remove(data)
                 if(len(List2)==0):
-                    time.sleep(4)
-                    sock.send("win")
-                    sock2.send("lose")
-                    time.sleep(4)
+                    sock.send(self.action["Win"])
+                    sock2.send(self.action["Lose"])
                     break
             else:
-                sock.send("miss")
+                
+                sock.send(self.action["Miss"])
             flag=False
             
 
-            
-            sock2.send("your turn")
+                     
+            sock2.send(self.action["Turn"])
             
             data=int(self.recv_data(sock2))
             for i in List:
                 if data==i:
                     flag=True
-                    sock2.send("hit")
+                    sock2.send(self.action["Hit"])
                     break
             if flag:
                 print(len(List))
                 List.remove(data)
                 if len(List)==0:
-                    time.sleep(4)
-                    sock2.send("win")
-                    sock.send("lose")
-                    time.sleep(4)
+                    sock2.send(self.action["Win"])
+                    sock.send(self.action["Lose"])
                     break
                 
             else:
-                sock2.send("miss")
+                sock2.send(self.action["Miss"])
+
 
     def wait(self,index,sock):
         global users
@@ -152,13 +152,11 @@ class Server:
         print("user list")
         for i in users[user['index']]['List']:
             print(i)
-        users[user['index']]['status']=1;
+        users[user['index']]['status']=1
         print("the status is" ,users[user['index']]['status'])
         print("the index is" ,users[user['index']]['index'])
         print("nice job")
         self.wait(user['index'],conn)
-        
-        conn.close()
         
 
 a=Server()
