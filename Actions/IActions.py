@@ -19,6 +19,7 @@ class Win(IActions):
     def do_action(self,sock):
          print("Win")
          sock.close()
+         return 0
 
 
 
@@ -30,6 +31,7 @@ class Turn(IActions):
     def do_action(self,sock):
         print("Turn")
         self.send_data(sock)
+        return 1
 
     def send_data(self,sock):
         flag_s=True
@@ -47,6 +49,7 @@ class Miss(IActions):
 
     def do_action(self,sock):
          print("Miss")
+         return 11
 
 
 class Lose(IActions):
@@ -57,6 +60,7 @@ class Lose(IActions):
     def do_action(self,sock):
         print("Lose")
         sock.close()
+        return 0
 
 
 class Hit(IActions):
@@ -66,6 +70,7 @@ class Hit(IActions):
 
     def do_action(self,sock):
         print("hit")
+        return 11
 
 
 

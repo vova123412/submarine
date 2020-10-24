@@ -1,29 +1,15 @@
 from random import randint
+from threading import Thread, Lock
 from Actions.IActions import *
 import os
 import socket
 import json
-import threading
 import pickle
 import time
-users=[]
-threads = []
-class Server:
+class Server():
     def __init__(self):
-        global users
-        global threads
-        self.action={
-        "Init_Ship":pickle.dumps(Init_Ship()),
-        "Turn":pickle.dumps(Turn()),
-        "Miss":pickle.dumps(Miss()),
-        "Hit":pickle.dumps(Hit()),
-        "Win":pickle.dumps(Win()),
-        "Lose":pickle.dumps(Lose()),
-        "Error":pickle.dumps(Error())
-        }
-        #Settings Variables
-        #Create lists
-        self.ship_list = []
+        self.users=[]
+        self.threads=[]
 
         HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
         PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
@@ -33,7 +19,7 @@ class Server:
         sock.listen(5)
         index=0
         flag=True
-        while index<2: 
+        while index<3: 
             conn, addr = sock.accept()
             print('Connected by', addr)
             user={
@@ -44,10 +30,67 @@ class Server:
                 'List':[]
                 }
             index=index+1
-            users.append(user)
-            t = threading.Thread(target=self.play,args=(conn,addr,user))
-            threads.append(t)
+            self.users.append(user)
+            t = Thread(target=self.play,args=(conn,addr,user))
+            self.threads.append(t)
             t.start()
+
+
+
+
+
+
+    def play(self,conn,addr,user):
+        self.users[user['index']]['status']=1
+        print("the status is" ,self.users[user['index']]['status'])
+        print("the index is" ,self.users[user['index']]['index'])
+        print("nice job")
+        self.wait(user['index'],conn)
+
+    def wait(self,index,sock):
+        mutex = Lock()
+        index2=0
+        flag=True
+        mutex.acquire()
+        try:
+            while flag and self.users[index]['status']!=2:
+                for i in self.users:
+                    if i['status']==1 and i['index']!=index:
+                        flag=False
+                        index2=i['index']
+                        self.users[index]['status']=2
+                        self.users[index2]['status']=2
+                        one_vs_one=Game(self.users[index]['sock'],self.users[index]['List'],self.users[index2]['sock'],self.users[index2]['List'])
+            print("connected two players")
+
+        finally:
+            mutex.release()
+        
+        print("the mutch found")
+
+    
+
+
+
+class Game():
+    def  __init__(self,player_conn,player_map,player2_conn,player2_map):
+        self.player_conn=player_conn
+        self.player_map=player_map
+        self.player2_conn=player2_conn
+        self.player2_map=player2_map
+        self.action={
+        "Init_Ship":pickle.dumps(Init_Ship()),
+        "Turn":pickle.dumps(Turn()),
+        "Miss":pickle.dumps(Miss()),
+        "Hit":pickle.dumps(Hit()),
+        "Win":pickle.dumps(Win()),
+        "Lose":pickle.dumps(Lose()),
+        "Error":pickle.dumps(Error())
+        }
+        self.player_map= self.init_game_board(self.player_conn)
+        self.player2_map=self.init_game_board(self.player2_conn)
+        self.in_game(self.player_conn,self.player_map,self.player2_conn,self.player2_map)
+    
 
 
     def init_game_board(self,conn):
@@ -70,14 +113,8 @@ class Server:
                 conn.send(self.action["Error"])
         return ship_array
 
-    def recv_data(self,sock):
-        flag=True
-        while flag:
-            data=sock.recv(1024)
-            if data:
-                print(" \n the data is :",data)
-                return data
-                break
+
+
             
 
     def in_game(self,sock,List,sock2,List2):
@@ -128,35 +165,13 @@ class Server:
             else:
                 sock2.send(self.action["Miss"])
 
-
-    def wait(self,index,sock):
-        global users
-        index2=0
+    def recv_data(self,sock):
         flag=True
         while flag:
-            for i in users:
-                if i['status']==1 and i['index']!=index:
-                    flag=False
-                    index2=i['index']
-        print("connected two players")
-        users[index]['status']=2
-        users[index2]['status']=2
-        self.in_game(users[index]['sock'],users[index]['List'],users[index2]['sock'],users[index2]['List'])
-        users[index]['sock'].close()
-        users[index2]['sock'].close()
-
-    def play(self,conn,addr,user):
-        global users
-        User_List=self.init_game_board(conn)
-        users[user['index']]['List']=User_List
-        print("user list")
-        for i in users[user['index']]['List']:
-            print(i)
-        users[user['index']]['status']=1
-        print("the status is" ,users[user['index']]['status'])
-        print("the index is" ,users[user['index']]['index'])
-        print("nice job")
-        self.wait(user['index'],conn)
-        
+            data=sock.recv(1024)
+            if data:
+                print(" \n the data is :",data)
+                return data
+                break  
 
 a=Server()

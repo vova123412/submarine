@@ -26,14 +26,12 @@ class Client():
         location=0
         while self.flag:
             action_strategy=pickle.loads(sock.recv(1024))
-            action_strategy.do_action(sock)
-
-
-
+            if action_strategy.do_action(sock)==0:
+                break
+        print("Game Over")
 
 
     def init_conn(self):
-        
         threads=[]
         P_List=""
         HOST = '127.0.0.1'  # The server's hostname or IP address
@@ -43,8 +41,6 @@ class Client():
         t = threading.Thread(target=self.play,args=(sock,))
         threads.append(t)
         t.start()
-        time.sleep(200)
-        self.flag=False
 
    
 client=Client()
