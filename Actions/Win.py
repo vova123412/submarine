@@ -6,3 +6,4 @@ class Win(IActions):
 
     def do_action(self):
          print("Win")
+         return 0

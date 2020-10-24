@@ -6,27 +6,20 @@ from Actions.IActions import *
 
 class Client():
     def __init__(self):   
-        self.flag=True
         self.matrix= [0] * 100
         for i in range(9):
             self.matrix[i+1]=i+1
         for i in range(9):
             self.matrix[(i+1)*10]=i+1
-
         self.init_conn()
 
-    def Print(self):
-        Lmatrix =[ self.matrix[i:i+10] for i in range(0,len(self.matrix),10) ]
-        for i in Lmatrix:
-            print(i)
-        
+
 
             
     def play(self,sock):
-        location=0
-        while self.flag:
+        while True:
             action_strategy=pickle.loads(sock.recv(1024))
-            if action_strategy.do_action(sock)==0:
+            if action_strategy.do_action(sock,self.matrix)==0:
                 break
         print("Game Over")
 

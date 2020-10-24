@@ -16,10 +16,10 @@ class Win(IActions):
     def __init__(self,):
         pass
 
-    def do_action(self,sock):
-         print("Win")
-         sock.close()
-         return 0
+    def do_action(self,sock,matrix):
+        print("Win")
+        sock.close()
+        return 0
 
 
 
@@ -28,10 +28,10 @@ class Turn(IActions):
     def __init__(self,):
         pass
 
-    def do_action(self,sock):
+    def do_action(self,sock,matrix):
         print("Turn")
         self.send_data(sock)
-        return 1
+        return 10
 
     def send_data(self,sock):
         flag_s=True
@@ -45,11 +45,21 @@ class Turn(IActions):
 class Miss(IActions):
  
     def __init__(self,):
-        pass
+        self.coordinate=11
 
-    def do_action(self,sock):
-         print("Miss")
-         return 11
+    def do_action(self,sock,matrix):
+        print("Miss")
+        matrix[self.coordinate]=-1
+        self.Print(matrix)
+
+
+    def set_coordinate(self,coordinate):
+        self.coordinate=int(coordinate)
+
+    def Print(self,matrix):
+        Lmatrix =[ matrix[i:i+10] for i in range(0,len(matrix),10) ]
+        for i in Lmatrix:
+            print(i)
 
 
 class Lose(IActions):
@@ -57,7 +67,7 @@ class Lose(IActions):
     def __init__(self,):
         pass
 
-    def do_action(self,sock):
+    def do_action(self,sock,matrix):
         print("Lose")
         sock.close()
         return 0
@@ -66,17 +76,23 @@ class Lose(IActions):
 class Hit(IActions):
  
     def __init__(self,):
-        pass
+        self.coordinate=11
 
-    def do_action(self,sock):
+    def do_action(self,sock,matrix):
         print("hit")
-        return 11
+        matrix[self.coordinate]=1
+        self.Print(matrix)
+  
 
 
+    def set_coordinate(self,coordinate):
+        self.coordinate=int(coordinate)
 
 
-
-
+    def Print(self,matrix):
+        Lmatrix =[ matrix[i:i+10] for i in range(0,len(matrix),10) ]
+        for i in Lmatrix:
+            print(i)
 
 
 
@@ -88,9 +104,10 @@ class Init_Ship(IActions):
         pass
 
 
-    def do_action(self,sock):
+    def do_action(self,sock,matrix):
         print("init your ships")
         self.send_List(sock)
+        return 10
 
     
 
@@ -126,3 +143,4 @@ class Error(IActions):
         pass
     def do_action(self,sock):
         print("error")
+        return 0

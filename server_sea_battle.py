@@ -42,9 +42,6 @@ class Server():
 
     def play(self,conn,addr,user):
         self.users[user['index']]['status']=1
-        print("the status is" ,self.users[user['index']]['status'])
-        print("the index is" ,self.users[user['index']]['index'])
-        print("nice job")
         self.wait(user['index'],conn)
 
     def wait(self,index,sock):
@@ -81,8 +78,8 @@ class Game():
         self.action={
         "Init_Ship":pickle.dumps(Init_Ship()),
         "Turn":pickle.dumps(Turn()),
-        "Miss":pickle.dumps(Miss()),
-        "Hit":pickle.dumps(Hit()),
+        "Miss":Miss(),
+        "Hit":Hit(),
         "Win":pickle.dumps(Win()),
         "Lose":pickle.dumps(Lose()),
         "Error":pickle.dumps(Error())
@@ -126,11 +123,12 @@ class Game():
             sock.send(self.action["Turn"])
 
             data=int(self.recv_data(sock))
+           
             for i in List2:
                 if data==i:
                     flag=True
-                   
-                    sock.send(self.action["Hit"])
+                    self.action["Hit"].set_coordinate(data)
+                    sock.send(pickle.dumps(self.action["Hit"]))
                     break
             if flag:
                 print("\n list 2 is :",List2)
@@ -140,8 +138,8 @@ class Game():
                     sock2.send(self.action["Lose"])
                     break
             else:
-                
-                sock.send(self.action["Miss"])
+                self.action["Miss"].set_coordinate(data)
+                sock.send(pickle.dumps(self.action["Miss"]))
             flag=False
             
 
@@ -152,7 +150,8 @@ class Game():
             for i in List:
                 if data==i:
                     flag=True
-                    sock2.send(self.action["Hit"])
+                    self.action["Hit"].set_coordinate(data)
+                    sock2.send(pickle.dumps(self.action["Hit"]))
                     break
             if flag:
                 print(len(List))
@@ -163,7 +162,8 @@ class Game():
                     break
                 
             else:
-                sock2.send(self.action["Miss"])
+                self.action["Miss"].set_coordinate(data)
+                sock2.send(pickle.dumps(self.action["Miss"]))
 
     def recv_data(self,sock):
         flag=True
