@@ -6,6 +6,7 @@ import socket
 import json
 import pickle
 import time
+import sys
 class Server():
     def __init__(self):
         self.users=[]
@@ -19,7 +20,7 @@ class Server():
         sock.listen(5)
         index=0
         flag=True
-        while index<3: 
+        while index<4: 
             conn, addr = sock.accept()
             print('Connected by', addr)
             user={
@@ -34,6 +35,7 @@ class Server():
             t = Thread(target=self.play,args=(conn,addr,user))
             self.threads.append(t)
             t.start()
+        sys.exit() 
 
 
 

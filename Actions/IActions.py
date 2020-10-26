@@ -16,7 +16,7 @@ class Win(IActions):
     def __init__(self,):
         pass
 
-    def do_action(self,sock,matrix):
+    def do_action(self,sock,gui):
         print("Win")
         sock.close()
         return 0
@@ -26,20 +26,19 @@ class Win(IActions):
 class Turn(IActions):
  
     def __init__(self,):
-        pass
+        self.flag=True
 
-    def do_action(self,sock,matrix):
-        print("Turn")
-        self.send_data(sock)
+    def do_action(self,sock,gui):
+        print("attak its your turn ")
+        for i in range(len(gui.buttons)):
+            gui.buttons[i].configure(command= lambda i=i:self.send_attak(sock,i+11))
         return 10
 
-    def send_data(self,sock):
-        flag_s=True
-        while flag_s:
-            x=int(input("11-99  => 1,1 -9,9"))
-            if(x>9 and x<100):
-                flag_s=False
-        sock.send(str(x).encode('ascii'))
+    def send_attak(self,sock,coordiante):
+        if(int(coordiante)>9 and int(coordiante)<100 and self.flag):
+            self.flag=False
+            print(coordiante)
+            sock.send(str(coordiante).encode('ascii'))
     
 
 class Miss(IActions):
@@ -47,19 +46,14 @@ class Miss(IActions):
     def __init__(self,):
         self.coordinate=11
 
-    def do_action(self,sock,matrix):
+    def do_action(self,sock,gui):
         print("Miss")
-        matrix[self.coordinate]=-1
-        self.Print(matrix)
+        print(self.coordinate-11)
+        gui.buttons[self.coordinate-11].configure(bg="blue")
 
 
     def set_coordinate(self,coordinate):
         self.coordinate=int(coordinate)
-
-    def Print(self,matrix):
-        Lmatrix =[ matrix[i:i+10] for i in range(0,len(matrix),10) ]
-        for i in Lmatrix:
-            print(i)
 
 
 class Lose(IActions):
@@ -67,7 +61,7 @@ class Lose(IActions):
     def __init__(self,):
         pass
 
-    def do_action(self,sock,matrix):
+    def do_action(self,sock,gui):
         print("Lose")
         sock.close()
         return 0
@@ -78,21 +72,15 @@ class Hit(IActions):
     def __init__(self,):
         self.coordinate=11
 
-    def do_action(self,sock,matrix):
+    def do_action(self,sock,gui):
         print("hit")
-        matrix[self.coordinate]=1
-        self.Print(matrix)
+        print(self.coordinate-11)
+        gui.buttons[self.coordinate-11].configure(bg="red")
   
 
 
     def set_coordinate(self,coordinate):
         self.coordinate=int(coordinate)
-
-
-    def Print(self,matrix):
-        Lmatrix =[ matrix[i:i+10] for i in range(0,len(matrix),10) ]
-        for i in Lmatrix:
-            print(i)
 
 
 
@@ -101,38 +89,43 @@ class Hit(IActions):
 
 class Init_Ship(IActions):
     def __init__(self):
-        pass
+        self.shiplist=[]
 
 
-    def do_action(self,sock,matrix):
+    def do_action(self,sock,gui):
         print("init your ships")
-        self.send_List(sock)
+        for i in range(len(gui.buttons)):
+            gui.buttons[i].configure(command= lambda i=i:self.init_Shiplist(sock,i+11,gui))
         return 10
 
     
 
-    def send_List(self,sock):
-        List=self.init_List()
-        P_List=pickle.dumps(List)
-        sock.send(P_List)
+    def send_Shiplist(self,sock):
+        Pshiplist=pickle.dumps(self.shiplist)
+        sock.send(Pshiplist)
+    
     
 
-
-    def init_List(self):
-        List=[]
-        length=0
-        while(length<2):
-            x=int(input("place the ship "))
-            if(self.inList(List,x)):
-                length=length+1
-                List.append(x)
+    def init_Shiplist(self,sock,coordinate,gui):
+        if(len(self.shiplist)<2):
+            if(self.inList(int(coordinate))):
+                self.shiplist.append(int(coordinate))
+                print(coordinate)
+                
+                gui.buttons[coordinate-11].configure(bg="green")
+                if(len(self.shiplist)==2):
+                    print("send my ships")
+                    self.send_Shiplist(sock)
+                
             else:
                 print("invalid number")
-        return List
+
+  
 
 
-    def inList(self,List,value):
-        for i in List:
+
+    def inList(self,value):
+        for i in self.shiplist:
             if i==value:
                 return False
         return True
