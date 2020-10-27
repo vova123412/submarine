@@ -99,12 +99,14 @@ class Init_Ship(IActions):
 
     def do_action(self,sock,gui):
         print("init your ships")
+        gui.search.configure(command=lambda: self.disablesearch)
         for i in range(len(gui.buttons)):
             gui.buttons[i].configure(command= lambda i=i:self.init_Shiplist(sock,i+11,gui))
         return 10
 
     
-
+    def disablesearch(self):
+        pass
     def send_Shiplist(self,sock):
         Pshiplist=pickle.dumps(self.shiplist)
         sock.send(Pshiplist)
@@ -139,6 +141,16 @@ class Init_Ship(IActions):
 class Error(IActions):
     def __init__(self):
         pass
-    def do_action(self,sock):
+    def do_action(self,sock,gui):
         print("error")
         return 0
+
+class Options(IActions):
+    def __init__(self):
+        pass
+    def do_action(self,sock,gui):
+        print("options")
+        gui.search.configure(command=lambda: self.play_one_vs_one(sock))
+    
+    def play_one_vs_one(self,sock):
+        sock.send("search".encode("ascii"))

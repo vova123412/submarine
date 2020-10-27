@@ -64,7 +64,6 @@ class MultiPlayer(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-
         self.labels=[]
         self.buttons=[]
         self.controller = controller
@@ -89,12 +88,12 @@ class MultiPlayer(tk.Frame):
             print(x)
             if x!=10:
                 self.buttons[i].grid(row=y,column=x)
-        
-        search=tk.Button(self,text="search for game",command= lambda: self.searchGame())
-        search.grid(row=20,column=20)
+        self.init_game()
+        self.search=tk.Button(self,text="search for game")
+        self.search.grid(row=20,column=20)
 
 
-    def searchGame(self):
+    def init_game(self):
         self.client.init_conn()
 
 

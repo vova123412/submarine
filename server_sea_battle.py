@@ -30,7 +30,6 @@ class Server():
                 'index':index,
                 'addr':addr,
                 'sock':conn,
-                'List':[]
                 }
             index=index+1
             self.users.append(user)
@@ -46,15 +45,16 @@ class Server():
     def match(self):
         while self.init_server_flag:
             players_idx=self.searchforgames()
-            print(players_idx)
-            self.statusingame(players_idx)
-            match=Thread(target=self.create_new_game,args=(players_idx[0],players_idx[1]))
-            self.threads.append(match)
-            match.start()
+            if players_idx !=None:
+                print(players_idx)
+                self.statusingame(players_idx[0],players_idx[1])
+                match=Thread(target=self.create_new_game,args=(players_idx[0],players_idx[1]))
+                self.threads.append(match)
+                match.start()
 
-    def statusingame(self,players_idx):
-        self.users[players_idx[0]]['status']=2
-        self.users[players_idx[1]]['status']=2
+    def statusingame(self,player_one_idx,player_two_idx):
+        self.users[player_one_idx]['status']=2
+        self.users[player_two_idx]['status']=2
         
 
     def create_new_game(self,player_one_idx,player_two_idx):
@@ -78,7 +78,21 @@ class Server():
 
 
     def play(self,conn,user):
-        self.searchgamestatus(user)
+        message=pickle.dumps(Options())
+        conn.send(message)
+        data= self.recv_data(conn)
+        print(data)
+        if data=="search" and self.users[user['index']]['status']!=2:
+            self.searchgamestatus(user)
+    def recv_data(self,sock):
+        flag=True
+        while flag:
+            data=sock.recv(1024).decode("ascii")
+            if data:
+                print(" \n the data is :",data)
+                return data
+                break  
+
 
     def searchgamestatus(self,user):
         self.users[user['index']]['status']=1
