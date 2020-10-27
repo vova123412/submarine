@@ -11,16 +11,18 @@ class Server():
     def __init__(self):
         self.users=[]
         self.threads=[]
-
-        HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
+        self.init_server_flag=True
+        HOST = '0.0.0.0'  # Standard loopback interface address (localhost)
         PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
         sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind((HOST, PORT))
         sock.listen(5)
+        matches= Thread(target=self.match)
+        self.threads.append(matches)
+        matches.start()
         index=0
-        flag=True
-        while index<4: 
+        while index<5: 
             conn, addr = sock.accept()
             print('Connected by', addr)
             user={
@@ -32,51 +34,70 @@ class Server():
                 }
             index=index+1
             self.users.append(user)
-            t = Thread(target=self.play,args=(conn,addr,user))
+            t = Thread(target=self.play,args=(conn,user))
             self.threads.append(t)
             t.start()
+        self.init_server_flag=False
         sys.exit() 
 
 
 
 
+    def match(self):
+        while self.init_server_flag:
+            players_idx=self.searchforgames()
+            print(players_idx)
+            self.statusingame(players_idx)
+            match=Thread(target=self.create_new_game,args=(players_idx[0],players_idx[1]))
+            self.threads.append(match)
+            match.start()
 
-
-    def play(self,conn,addr,user):
-        self.users[user['index']]['status']=1
-        self.wait(user['index'],conn)
-
-    def wait(self,index,sock):
-        mutex = Lock()
-        index2=0
-        flag=True
-        mutex.acquire()
-        try:
-            while flag and self.users[index]['status']!=2:
-                for i in self.users:
-                    if i['status']==1 and i['index']!=index:
-                        flag=False
-                        index2=i['index']
-                        self.users[index]['status']=2
-                        self.users[index2]['status']=2
-                        one_vs_one=Game(self.users[index]['sock'],self.users[index]['List'],self.users[index2]['sock'],self.users[index2]['List'])
-            print("connected two players")
-
-        finally:
-            mutex.release()
+    def statusingame(self,players_idx):
+        self.users[players_idx[0]]['status']=2
+        self.users[players_idx[1]]['status']=2
         
-        print("the mutch found")
+
+    def create_new_game(self,player_one_idx,player_two_idx):
+        one_vs_one=Game(self.users[player_one_idx]['sock'],self.users[player_two_idx]['sock'])
+        
+
+    def searchforgames(self):
+        while self.init_server_flag:
+            players_idx=[]
+            for i in self.users:
+                if i['status']==1:
+                    players_idx.append(i['index'])
+                if len(players_idx)==2:
+                    print("match found")
+                    return players_idx
+
+
+                
+                   
+        
+
+
+    def play(self,conn,user):
+        self.searchgamestatus(user)
+
+    def searchgamestatus(self,user):
+        self.users[user['index']]['status']=1
+        
+    def wait(self,index,sock):
+        pass
+        
+    
 
     
 
 
 
 class Game():
-    def  __init__(self,player_conn,player_map,player2_conn,player2_map):
+    def  __init__(self,player_conn,player2_conn):
         self.player_conn=player_conn
-        self.player_map=player_map
+        self.player_map=[]
         self.player2_conn=player2_conn
-        self.player2_map=player2_map
+        self.player2_map=[]
         self.action={
         "Init_Ship":pickle.dumps(Init_Ship()),
         "Turn":pickle.dumps(Turn()),

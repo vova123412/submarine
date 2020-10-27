@@ -68,6 +68,7 @@ class MultiPlayer(tk.Frame):
         self.labels=[]
         self.buttons=[]
         self.controller = controller
+        self.client=Client(self)
         idx=[]
         menu = tk.Button(self, text="Go to the menu",command=lambda: controller.show_frame("Menu"))
         menu.grid(row=25,column=20)
@@ -88,14 +89,13 @@ class MultiPlayer(tk.Frame):
             print(x)
             if x!=10:
                 self.buttons[i].grid(row=y,column=x)
-        search=tk.Button(self,text="search for game",command= lambda i=i: self.ChangeColor(i))
+        
+        search=tk.Button(self,text="search for game",command= lambda: self.searchGame())
         search.grid(row=20,column=20)
-        self.client=Client(self)
-        self.client.init_conn()
 
-    def ChangeColor(self,idx):
-        print(idx)
-        self.buttons[idx].configure(bg="green")
+
+    def searchGame(self):
+        self.client.init_conn()
 
 
 class SinglePlayer(tk.Frame):

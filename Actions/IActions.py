@@ -17,6 +17,9 @@ class Win(IActions):
         pass
 
     def do_action(self,sock,gui):
+        for i in range(len(gui.buttons)):
+            gui.buttons[i].configure(bg="gray")
+        
         print("Win")
         sock.close()
         return 0
@@ -62,6 +65,8 @@ class Lose(IActions):
         pass
 
     def do_action(self,sock,gui):
+        for i in range(len(gui.buttons)):
+            gui.buttons[i].configure(bg="gray")
         print("Lose")
         sock.close()
         return 0
