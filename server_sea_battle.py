@@ -7,6 +7,7 @@ import json
 import pickle
 import time
 import sys
+import time
 class Server():
     def __init__(self):
         self.users=[]
@@ -55,10 +56,13 @@ class Server():
     def statusingame(self,player_one_idx,player_two_idx):
         self.users[player_one_idx]['status']=2
         self.users[player_two_idx]['status']=2
-        
+    
+    def statusendgame(self,player_one_idx,player_two_idx):
+        self.users[player_one_idx]['status']=0
+        self.users[player_two_idx]['status']=0
 
     def create_new_game(self,player_one_idx,player_two_idx):
-        one_vs_one=Game(self.users[player_one_idx]['sock'],self.users[player_two_idx]['sock'])
+        one_vs_one=Game(self.users[player_one_idx]['sock'],self.users[player_two_idx]['sock'],player_one_idx,player_two_idx,self)
         
 
     def searchforgames(self):
@@ -78,12 +82,15 @@ class Server():
 
 
     def play(self,conn,user):
-        message=pickle.dumps(Options())
-        conn.send(message)
-        data= self.recv_data(conn)
-        print(data)
-        if data=="search" and self.users[user['index']]['status']!=2:
-            self.searchgamestatus(user)
+        while self.init_server_flag:
+            time.sleep(4)
+            if self.users[user['index']]['status']!=2 and self.users[user['index']]['status']!=1:
+                message=pickle.dumps(Options())
+                conn.send(message)
+                data= self.recv_data(conn)
+                print(data)
+                if data=="search":
+                    self.searchgamestatus(user)
     def recv_data(self,sock):
         flag=True
         while flag:
@@ -107,7 +114,10 @@ class Server():
 
 
 class Game():
-    def  __init__(self,player_conn,player2_conn):
+    def  __init__(self,player_conn,player2_conn,player_idx,player2_idx,server):
+        self.player_idx=player_idx
+        self.player2_idx=player2_idx
+        self.server=server
         self.player_conn=player_conn
         self.player_map=[]
         self.player2_conn=player2_conn
@@ -125,7 +135,7 @@ class Game():
         self.player2_map=self.init_game_board(self.player2_conn)
         self.in_game(self.player_conn,self.player_map,self.player2_conn,self.player2_map)
     
-
+    
 
     def init_game_board(self,conn):
         flag=True
@@ -201,6 +211,12 @@ class Game():
             else:
                 self.action["Miss"].set_coordinate(data)
                 sock2.send(pickle.dumps(self.action["Miss"]))
+        self.endgame()
+    
+
+    def endgame(self):
+        print("we end here")
+        self.server.statusendgame(self.player_idx,self.player2_idx)
 
     def recv_data(self,sock):
         flag=True
