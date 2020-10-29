@@ -7,64 +7,84 @@ import pickle
 import time
 users=[]
 threads = []
-class Server:
-    def __init__(self):
-        global users
-        global threads
-     
-
-        HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
-        PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
-
-        sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind((HOST, PORT))
-        sock.listen(5)
-        index=0
-        flag=True
-        while index<4: 
-            conn, addr = sock.accept()
-            print('Connected by', addr)
-            user={
-                'status':0,
-                'index':index,
-                'addr':addr,
-                'sock':conn,
-                'List':[]
-                }
-            index=index+1
-            users.append(user)
-            t = threading.Thread(target=self.play,args=(conn,addr,user))
-            threads.append(t)
-            t.start()
-
-
-    def print_board(self,board_array):
-        pass
 
 
 
 
+class Proxy:
 
-
-
-    def init_game_board(self,conn):
+    def __init__(self,conn,player,index):
+        self.index=index
+        self.player=player
+        game=Game()
+        self.conn=conn
+        self.enemy_index
+        
+    def Validate_Board(self):
         flag=True
         while flag:
-            conn.send("give me your ships");
+            mesg="give me your ships"
+            self.conn.send(mesg.encode('ascii'));
             try:         
-                ship_array =pickle.loads( conn.recv(1024))
+                ship_array =pickle.loads( self.conn.recv(1024))
                 flag = False
                 for i in ship_array:
                     print(i)
                     if i<=9 or i>100 or (i>9 and i%10==0):
                         print("fail")
                         flag=True
-                        
-                
             except:
+                mesg="error wrong type".encode('ascii')
                 flag=True
-                conn.send("noob error wrong type")
+                self.conn.send(mesg)
         return ship_array
+
+    def Validate_Coordinat(self,enemy_conn):
+        player_board=users[self.enemy_index]['List']
+        enemy_board= users[self.enemy_index]['List']
+        flag_s=True
+        coordinate
+        while flag_s:
+            coordinate=(int)(self.conn.recv(1024).decode('ascii'))
+            if(coordinate>9 and coordinate<100):
+                if(self.game.Attak(coordinate,enemy_board)):
+                   enemy_board.Remove(coordinate)
+                   if self.game.Win(enemy_board):
+                        mesg="win".encode("ascii")
+                        conn.send(mesg)
+                   else:
+                        mesg="hit".encode("ascii")
+                        conn.send(mesg)
+            coordinate=(int)(enemy_conn.recv(1024).decode('ascii'))
+            if(coordinate>9 and coordinate<100):
+                if(self.game.Attak(coordinate,player_board)):
+                   player_board.Remove(coordinate)
+                   if self.game.Win(player_board):
+                        mesg="win".encode("ascii")
+                        enemy_conn.send(mesg)
+                   else:
+                        mesg="hit".encode("ascii")
+                        enemy_conn.send(mesg)
+                    
+            
+        sock.send(str(x.encode('ascii')))
+        return x
+
+        print("validate coordinates")
+
+        
+    def Start():
+        self.game.Init_Game_Board(self.Validate_Board())
+        self.enemy_index=self.game.Wait(index,conn)
+        self.game.Status_In_Game(index,enemy_index)
+        self.game.in_game(users[index]['sock'],users[index]['List'],users[self.enemy_index]['sock'],users[self.enemy_index]['List'])
+        self.game.Status_Ready(index)
+        self.game.Status_Ready(enemy_index)
+        
+    def Close_Game(self,index,index2):
+        users[index]['sock'].close()
+        users[index2]['sock'].close()
+
 
     def recv_data(self,sock):
         flag=True
@@ -74,8 +94,73 @@ class Server:
                 print(" \n the data is :",data)
                 return data
                 break
-            
 
+        
+        
+
+
+class Game:
+    global Users
+    def __init__():
+        self.string="asds"
+        
+
+
+    def Init_Game_Board(self,player_board,user):
+        print("init boad")
+        users[user['index']]['List']=player_board
+
+        
+    def Status_Ready(self,user):
+        for i in users[user['index']]['List']:
+            print(i)
+        users[user['index']]['status']=1;
+        print("the status is" ,users[user['index']]['status'])
+        print("the index is" ,users[user['index']]['index'])
+        print("nice job")
+    
+
+    def play(self,conn,user):
+        global users
+        self.wait(user['index'],conn)
+        conn.close()
+
+
+    def Wait(self,index,sock):
+        global users
+        index2=0
+        flag=True
+        while flag:
+            for i in users:
+                if i['status']==1 and i['index']!=index:
+                    flag=False
+                    index2=i['index']
+        print("connected two players")
+        self.Status_In_Game(index,index2)
+        return index2
+        
+       
+
+    def Status_In_Game(self,index,index2):
+        global users
+        users[index]['status']=2
+        users[index2]['status']=2
+
+        
+    def Player_One_Game(self,coordinate,board):
+        pass
+
+    def Win(self,board):
+        if len(board)==0:
+            return True
+        return False
+        
+    def Attak(sekf,coordinate,board):
+        for pos in board:
+            if pos==coordinate:
+                return True
+        return False
+    
     def in_game(self,sock,List,sock2,List2):
         print("\n \n",List,List2)
         while len(List)!=0 and len(List2)!=0:
@@ -123,36 +208,50 @@ class Server:
             else:
                 sock2.send("miss")
 
-    def wait(self,index,sock):
-        global users
-        index2=0
-        flag=True
-        while flag:
-            for i in users:
-                if i['status']==1 and i['index']!=index:
-                    flag=False
-                    index2=i['index']
-        print("connected two players")
-        users[index]['status']=2
-        users[index2]['status']=2
-        self.in_game(users[index]['sock'],users[index]['List'],users[index2]['sock'],users[index2]['List'])
-        users[index]['sock'].close()
-        users[index2]['sock'].close()
-
-    def play(self,conn,addr,user):
-        global users
-        User_List=self.init_game_board(conn)
-        users[user['index']]['List']=User_List
-        print("user list")
-        for i in users[user['index']]['List']:
-            print(i)
-        users[user['index']]['status']=1;
-        print("the status is" ,users[user['index']]['status'])
-        print("the index is" ,users[user['index']]['index'])
-        print("nice job")
-        self.wait(user['index'],conn)
         
-        conn.close()
+
+
+        
+
+
+
+class Server:
+    def __init__(self):
+        global users
+        global threads
+     
+
+        HOST = '127.0.0.1' 
+        PORT = 65432        
+
+        sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.bind((HOST, PORT))
+        sock.listen(5)
+        index=0
+        flag=True
+        
+        while index<2: 
+            conn, addr = sock.accept()
+            print('Connected by', addr)
+            user={
+                'status':0,
+                'index':index,
+                'addr':addr,
+                'sock':conn,
+                'List':[]
+                }
+            index=index+1
+            users.append(user)
+            proxy=Proxy(conn,user)
+            t = threading.Thread(target=proxy.Start,args=())
+            threads.append(t)
+            t.start()
+
+
+
+
+        
+
         
 
 a=Server()
