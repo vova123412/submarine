@@ -3,17 +3,21 @@ import pickle
 import time
 import threading
 
+# What is One_Player?
 class One_Player:
     instance=None
+    # this name is not informative
+    # this is a GOD Class
+    # you have to make some changes and divide your code!
     class __Player:
         def __init__(self):
             self.value=""
-            self.flag=True
+            self.flag=True# what is flag?
             self.matrix= [0] * 100
             self.threads=[]
             self.P_List="";
             HOST = '127.0.0.1' 
-            PORT = 65432        
+            PORT = 65432
             self.sock= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((HOST, PORT))
             self.t = threading.Thread(target=self.recv,args=(self.sock,))
@@ -21,13 +25,15 @@ class One_Player:
             t.start()
             time.Sleep(2000)
 
-
+        # What Data?
         def Send_Data(self):
-            flag_s=True
+            flag_s=True # what the meaning of flag_s?
             while flag_s:
+                # x variable will die at the end of while loop
                 x=input("11-99  => 1,1 -9,9")
                 if(x>9 and x<100):
                     flag_s=False
+                # Watch levels of abstractions
                 self.sock.send(str(x.encode('ascii')))
             return x
 
@@ -36,6 +42,7 @@ class One_Player:
                 self.matrix[i+1]=i+1
             for i in range(9):
                 self.matrix[(i+1)*10]=i+1
+        # recv what?
         def Recv(self):
             flag=True
             data=None
@@ -44,7 +51,10 @@ class One_Player:
                 if data:
                     flag= False
             return data
-                
+
+        # the function called "Get..." but doesnt return anything
+        # the function is a Command not query
+        # the function is over 10 lines of code
         def Get_Action(self,action):
             location=0
             while self.flag:
@@ -72,17 +82,20 @@ class One_Player:
                     self.flag=False
                
 
+
+        # what list?
+        # what the purpose of value parameter?
         def inList(self,List,value):
             for i in List:
                 if i==value:
                     return False
             return True
-            
-                
+             
         def init_List():
             List=[]
             length=0
             while(length<2):
+                # initializing doesnt call of an input
                 x=input("place the ship ")
                 if(inList(List,x)):
                     length=length+1
@@ -99,8 +112,6 @@ class One_Player:
             
         def Print(self):
             print(self.value)
-
-
             
         def Set_Value(self,value):
             self.value=value

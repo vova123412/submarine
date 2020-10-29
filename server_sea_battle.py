@@ -10,7 +10,9 @@ threads = []
 
 
 
-
+# what is this proxy for?
+# please revisit proxy pattern
+# maybe you could use a validator layer like decorator
 class Proxy:
 
     def __init__(self,conn,player,index):
@@ -19,7 +21,8 @@ class Proxy:
         game=Game()
         self.conn=conn
         self.enemy_index
-        
+    
+    # this function is over 10 lines of code
     def Validate_Board(self):
         flag=True
         while flag:
@@ -39,12 +42,15 @@ class Proxy:
                 self.conn.send(mesg)
         return ship_array
 
+    # this function is over 10 lines of code
     def Validate_Coordinat(self,enemy_conn):
+        # watch levels of abstractions in this code
         player_board=users[self.enemy_index]['List']
         enemy_board= users[self.enemy_index]['List']
         flag_s=True
         coordinate
         while flag_s:
+            # decoding and encoding are low level abstraction
             coordinate=(int)(self.conn.recv(1024).decode('ascii'))
             if(coordinate>9 and coordinate<100):
                 if(self.game.Attak(coordinate,enemy_board)):
@@ -80,7 +86,7 @@ class Proxy:
         self.game.in_game(users[index]['sock'],users[index]['List'],users[self.enemy_index]['sock'],users[self.enemy_index]['List'])
         self.game.Status_Ready(index)
         self.game.Status_Ready(enemy_index)
-        
+
     def Close_Game(self,index,index2):
         users[index]['sock'].close()
         users[index2]['sock'].close()
@@ -98,19 +104,18 @@ class Proxy:
         
         
 
-
+# Game Facade, but what game are we playing?
 class Game:
     global Users
     def __init__():
         self.string="asds"
-        
-
 
     def Init_Game_Board(self,player_board,user):
         print("init boad")
         users[user['index']]['List']=player_board
 
-        
+    
+    # function name should contain a verb
     def Status_Ready(self,user):
         for i in users[user['index']]['List']:
             print(i)
@@ -120,16 +125,17 @@ class Game:
         print("nice job")
     
 
+    # using connection objects is not hiding 3d-party code like sockets
     def play(self,conn,user):
         global users
         self.wait(user['index'],conn)
         conn.close()
 
-
+    # wait for what?
     def Wait(self,index,sock):
         global users
         index2=0
-        flag=True
+        flag=True # what is flag?
         while flag:
             for i in users:
                 if i['status']==1 and i['index']!=index:
@@ -140,7 +146,7 @@ class Game:
         return index2
         
        
-
+    # the function doesnt contain a verb
     def Status_In_Game(self,index,index2):
         global users
         users[index]['status']=2
@@ -154,7 +160,9 @@ class Game:
         if len(board)==0:
             return True
         return False
-        
+    
+    # command query seperation is violated!
+    # this function is not making any changes
     def Attak(sekf,coordinate,board):
         for pos in board:
             if pos==coordinate:
@@ -214,8 +222,9 @@ class Game:
         
 
 
-
+# what server?
 class Server:
+    # the constructor is over 10 lines of code
     def __init__(self):
         global users
         global threads
@@ -223,7 +232,7 @@ class Server:
 
         HOST = '127.0.0.1' 
         PORT = 65432        
-
+        # the names are not good you didn't think about them at all
         sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind((HOST, PORT))
         sock.listen(5)
