@@ -94,6 +94,7 @@ class Init_Ship(IActions):
 
 
     def do_action(self,sock,gui):
+        gui.search.configure(text="in game")
         print("init your ships")
         gui.search.configure(command=lambda: self.disablesearch)
         for i in range(len(gui.buttons)):
@@ -134,6 +135,18 @@ class Init_Ship(IActions):
         return True
         
 
+
+class Wait(IActions):
+    def __init__(self):
+        pass
+    def do_action(self,sock,gui):
+        print("Wait")
+        gui.search.configure(command=lambda: self.donothing())
+        gui.search.configure(text="waiting")
+    
+    def donothing(self):
+        pass
+
 class Error(IActions):
     def __init__(self):
         pass
@@ -146,6 +159,7 @@ class Options(IActions):
         pass
     def do_action(self,sock,gui):
         print("options")
+        gui.search.configure(text="search")
         gui.search.configure(command=lambda: self.play_one_vs_one(sock))
     
     def play_one_vs_one(self,sock):

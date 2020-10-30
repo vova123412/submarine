@@ -12,39 +12,39 @@ class Server():
     def __init__(self):
         self.users=[]
         self.threads=[]
-        self.init_server_flag=True
-        HOST = '0.0.0.0'  # Standard loopback interface address (localhost)
-        PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
-
+        self.semaphore =True
+        HOST = ''  
+        PORT = 65432       
         sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((HOST, PORT))
         sock.listen(5)
         matches= Thread(target=self.match)
         self.threads.append(matches)
         matches.start()
-        index=0
-        while index<5: 
+        player_idx=0
+        while player_idx<5: 
             conn, addr = sock.accept()
             print('Connected by', addr)
             user={
                 'status':0,
-                'index':index,
+                'index':player_idx,
                 'addr':addr,
                 'sock':conn,
                 }
-            index=index+1
+            player_idx=player_idx+1
             self.users.append(user)
             t = Thread(target=self.play,args=(conn,user))
             self.threads.append(t)
             t.start()
-        self.init_server_flag=False
+        self.semaphore =False
         sys.exit() 
 
 
 
 
     def match(self):
-        while self.init_server_flag:
+        while self.semaphore :
             players_idx=self.searchforgames()
             if players_idx !=None:
                 print(players_idx)
@@ -66,7 +66,7 @@ class Server():
         
 
     def searchforgames(self):
-        while self.init_server_flag:
+        while self.semaphore :
             players_idx=[]
             for i in self.users:
                 if i['status']==1:
@@ -82,15 +82,20 @@ class Server():
 
 
     def play(self,conn,user):
-        while self.init_server_flag:
-            time.sleep(4)
+        while self.semaphore :
             if self.users[user['index']]['status']!=2 and self.users[user['index']]['status']!=1:
                 message=pickle.dumps(Options())
                 conn.send(message)
                 data= self.recv_data(conn)
                 print(data)
                 if data=="search":
+                    conn.send(pickle.dumps(Wait()))
                     self.searchgamestatus(user)
+                    print(self.users[user['index']]['status'])
+                    time.sleep(3)
+
+
+                    
     def recv_data(self,sock):
         flag=True
         while flag:

@@ -68,8 +68,16 @@ class MultiPlayer(tk.Frame):
         self.buttons=[]
         self.controller = controller
         self.client=Client(self)
-        idx=[]
-        menu = tk.Button(self, text="Go to the menu",command=lambda: controller.show_frame("Menu"))
+        self.init_gui()
+        self.init_game()
+        
+
+
+    def init_game(self):
+        self.client.init_conn()
+
+    def init_gui(self):
+        menu = tk.Button(self, text="Go to the menu",command=lambda: self.controller.show_frame("Menu"))
         menu.grid(row=25,column=20)
        
         for i in range(0,10):
@@ -81,22 +89,19 @@ class MultiPlayer(tk.Frame):
             self.labels[i+9].grid(row=int(i%10),column=0)
             
         for i in range(89):
-            idx.append(i)
             self.buttons.append(tk.Button(self,text=str(i+11),width=4))
             y=int(i/10+1)
             x=int(i%10+1)
             print(x)
             if x!=10:
                 self.buttons[i].grid(row=y,column=x)
-        self.init_game()
+        
         self.search=tk.Button(self,text="search for game")
         self.search.grid(row=20,column=20)
 
 
-    def init_game(self):
-        self.client.init_conn()
 
-
+        
 class SinglePlayer(tk.Frame):
 
     def __init__(self, parent, controller):
