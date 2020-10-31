@@ -86,6 +86,20 @@ class Hit(IActions):
         self.coordinate=int(coordinate)
 
 
+class HitMe(IActions):
+    def __init__(self,):
+        self.coordinate=11
+
+    def do_action(self,sock,gui):
+        print("hit")
+        print(self.coordinate-11)
+        gui.board[self.coordinate-11].configure(bg="red")
+  
+
+
+    def set_coordinate(self,coordinate):
+        self.coordinate=int(coordinate)
+
 
 
 
@@ -109,8 +123,6 @@ class Init_Ship(IActions):
     def send_Shiplist(self,sock):
         Pshiplist=pickle.dumps(self.shiplist)
         sock.send(Pshiplist)
-    
-    
 
     def init_Shiplist(self,sock,coordinate,gui):
         if(len(self.shiplist)<2):
@@ -125,9 +137,6 @@ class Init_Ship(IActions):
                 
             else:
                 print("invalid number")
-
-  
-
 
 
     def inList(self,value):

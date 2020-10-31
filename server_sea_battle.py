@@ -134,7 +134,8 @@ class Game():
         "Hit":Hit(),
         "Win":pickle.dumps(Win()),
         "Lose":pickle.dumps(Lose()),
-        "Error":pickle.dumps(Error())
+        "Error":pickle.dumps(Error()),
+        "HitMe":HitMe()
         }
         self.player_map= self.init_game_board(self.player_conn)
         self.player2_map=self.init_game_board(self.player2_conn)
@@ -180,7 +181,9 @@ class Game():
                 if data==i:
                     flag=True
                     self.action["Hit"].set_coordinate(data)
+                    self.action["HitMe"].set_coordinate(data)
                     sock.send(pickle.dumps(self.action["Hit"]))
+                    sock2.send(pickle.dumps(self.action["HitMe"]))
                     break
             if flag:
                 print("\n list 2 is :",List2)
@@ -191,7 +194,9 @@ class Game():
                     break
             else:
                 self.action["Miss"].set_coordinate(data)
+                self.action["HitMe"].set_coordinate(data)
                 sock.send(pickle.dumps(self.action["Miss"]))
+                sock2.send(pickle.dumps(self.action["HitMe"]))
             flag=False
             
 
@@ -202,8 +207,10 @@ class Game():
             for i in List:
                 if data==i:
                     flag=True
+                    self.action["HitMe"].set_coordinate(data)
                     self.action["Hit"].set_coordinate(data)
                     sock2.send(pickle.dumps(self.action["Hit"]))
+                    sock.send(pickle.dumps(self.action["HitMe"]))
                     break
             if flag:
                 print(len(List))
@@ -214,8 +221,10 @@ class Game():
                     break
                 
             else:
+                self.action["HitMe"].set_coordinate(data)
                 self.action["Miss"].set_coordinate(data)
                 sock2.send(pickle.dumps(self.action["Miss"]))
+                sock.send(pickle.dumps(self.action["HitMe"]))
         self.endgame()
     
 
