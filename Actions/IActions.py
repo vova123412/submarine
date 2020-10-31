@@ -17,8 +17,9 @@ class Win(IActions):
         pass
 
     def do_action(self,sock,gui):
-        for i in range(len(gui.buttons)):
-            gui.buttons[i].configure(bg="gray")
+        for i in range(len(gui.board)):
+            gui.board[i].configure(bg="gray")
+            gui.enemyboard[i].configure(bg="gray")
         print("Win")
 
 
@@ -30,8 +31,8 @@ class Turn(IActions):
 
     def do_action(self,sock,gui):
         print("attak its your turn ")
-        for i in range(len(gui.buttons)):
-            gui.buttons[i].configure(command= lambda i=i:self.send_attak(sock,i+11))
+        for i in range(len(gui.enemyboard)):
+            gui.enemyboard[i].configure(command= lambda i=i:self.send_attak(sock,i+11))
         return 10
 
     def send_attak(self,sock,coordiante):
@@ -49,7 +50,7 @@ class Miss(IActions):
     def do_action(self,sock,gui):
         print("Miss")
         print(self.coordinate-11)
-        gui.buttons[self.coordinate-11].configure(bg="blue")
+        gui.enemyboard[self.coordinate-11].configure(bg="blue")
 
 
     def set_coordinate(self,coordinate):
@@ -62,8 +63,9 @@ class Lose(IActions):
         pass
 
     def do_action(self,sock,gui):
-        for i in range(len(gui.buttons)):
-            gui.buttons[i].configure(bg="gray")
+        for i in range(len(gui.board)):
+            gui.board[i].configure(bg="gray")
+            gui.enemyboard[i].configure(bg="gray")
         print("Lose")
 
 
@@ -76,7 +78,7 @@ class Hit(IActions):
     def do_action(self,sock,gui):
         print("hit")
         print(self.coordinate-11)
-        gui.buttons[self.coordinate-11].configure(bg="red")
+        gui.enemyboard[self.coordinate-11].configure(bg="red")
   
 
 
@@ -97,8 +99,8 @@ class Init_Ship(IActions):
         gui.search.configure(text="in game")
         print("init your ships")
         gui.search.configure(command=lambda: self.disablesearch)
-        for i in range(len(gui.buttons)):
-            gui.buttons[i].configure(command= lambda i=i:self.init_Shiplist(sock,i+11,gui))
+        for i in range(len(gui.board)):
+            gui.board[i].configure(command= lambda i=i:self.init_Shiplist(sock,i+11,gui))
         return 10
 
     
@@ -116,7 +118,7 @@ class Init_Ship(IActions):
                 self.shiplist.append(int(coordinate))
                 print(coordinate)
                 
-                gui.buttons[coordinate-11].configure(bg="green")
+                gui.board[coordinate-11].configure(bg="green")
                 if(len(self.shiplist)==2):
                     print("send my ships")
                     self.send_Shiplist(sock)

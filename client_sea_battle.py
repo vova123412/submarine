@@ -14,7 +14,7 @@ class SampleApp(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
         self.configure(background='skyblue')
-        self.geometry('1000x700+250+50')
+        self.geometry('1000x800+250+50')
         self.resizable(width = False, height = False)
         self.title_font = tkfont.Font()
         container = tk.Frame(self)
@@ -57,6 +57,8 @@ class Menu(tk.Frame):
         button2 = tk.Button(self,width=100,pady=10, text="SinglePlayer", command=lambda: controller.show_frame("SinglePlayer"))
         button1.pack(pady=10)
         button2.pack(pady=10)
+
+
       
 
 
@@ -65,20 +67,25 @@ class MultiPlayer(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.labels=[]
-        self.buttons=[]
+        self.enemylabels=[]
+        self.board=[]
+        self.enemyboard=[]
         self.controller = controller
-        self.client=Client(self)
         self.init_gui()
-        self.init_game()
         
 
 
     def init_game(self):
-        self.client.init_conn()
+        Client.getinstance(self)
+
+
+
+
+
+        
 
     def init_gui(self):
-        menu = tk.Button(self, text="Go to the menu",command=lambda: self.controller.show_frame("Menu"))
-        menu.grid(row=25,column=20)
+
        
         for i in range(0,10):
             self.labels.append(tk.Label(self,text=str(i),padx=10))
@@ -89,15 +96,38 @@ class MultiPlayer(tk.Frame):
             self.labels[i+9].grid(row=int(i%10),column=0)
             
         for i in range(89):
-            self.buttons.append(tk.Button(self,text=str(i+11),width=4))
+            self.board.append(tk.Button(self,text=str(i+11),width=4))
             y=int(i/10+1)
             x=int(i%10+1)
-            print(x)
             if x!=10:
-                self.buttons[i].grid(row=y,column=x)
-        
-        self.search=tk.Button(self,text="search for game")
-        self.search.grid(row=20,column=20)
+                self.board[i].grid(row=y,column=x)
+
+
+
+       
+        for i in range(0,10):
+            self.enemylabels.append(tk.Label(self,text=str(i),padx=10))
+            self.enemylabels[i].grid(row=50,column=int(i%10))
+            
+        for i in range(1,10):
+            self.enemylabels.append(tk.Label(self,text=str(i),pady=10))                   
+            self.enemylabels[i+9].grid(row=int(i%10)+50,column=0)
+            
+        for i in range(89):
+            self.enemyboard.append(tk.Button(self,text=str(i+11),width=4))
+            y=int(i/10+1)
+            x=int(i%10+1)
+            if x!=10:
+                self.enemyboard[i].grid(row=y+50,column=x)
+
+    
+
+
+
+        menu = tk.Button(self, text="Go to the menu",command=lambda: self.controller.show_frame("Menu"))
+        menu.grid(row=40,column=40)
+        self.search=tk.Button(self,text="connect to server",command=lambda: self.init_game())
+        self.search.grid(row=40,column=60)
 
 
 
@@ -116,11 +146,21 @@ class SinglePlayer(tk.Frame):
 
 
 class Client():
+    __instance=None
     def __init__(self,gui):
-        self.gui=gui
+      if Client.__instance != None:
+         pass
+      else:
+         self.gui=gui
+         self.init_conn()
+         Client.__instance = self
+      
+    @staticmethod 
+    def getinstance(gui):
+        if Client.__instance==None:
+            Client(gui)
+        return Client.__instance
 
-    def changecolor(self):
-        self.gui.buttons[1].configure(bg="green")
             
     def play(self,sock):
         while True:
