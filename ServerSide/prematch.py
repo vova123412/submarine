@@ -31,12 +31,12 @@ class PreMatch:
                 match.start()
 
 
-    # function name should contain a verb
+
     def changestatusingame(self,player_one_idx,player_two_idx):
         self.users[player_one_idx]['status']=2
         self.users[player_two_idx]['status']=2
 
-     # function name should contain a verb
+
     def changestatusendgame(self,player_one_idx,player_two_idx):
         self.users[player_one_idx]['status']=0
         self.users[player_two_idx]['status']=0

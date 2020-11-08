@@ -44,6 +44,7 @@ class Turn(IActions):
 
     def do_action(self,sock,frame):
         print("Turn")
+        frame.sendcoordinatebutton.configure(command= lambda :self.donothing())
         frame.startgame.config(text="attak")
         for i in range(0,100):
             if(int(i/10)!=0 and int(i%10)!=0):
@@ -119,7 +120,7 @@ class Send_Ship(IActions):
     def do_action(self,sock,frame):
         print("init your ships")
         frame.startgame.config(text="init board ",command= lambda: self.donothing())
-        frame.sendcoordinate.configure(command= lambda :self.send_List(sock,frame))
+        frame.sendcoordinatebutton.configure(command= lambda :self.send_List(sock,frame))
         return 10
 
     def donothing(self):

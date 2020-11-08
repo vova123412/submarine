@@ -9,17 +9,8 @@ from ServerSide.IActions import *
 from ServerSide.playermannger import *
 from ServerSide.prematch import *
 
-# what is this proxy for?
-# please revisit proxy pattern 
-# maybe you could use a validator layer like decorato
-    
-    # this function is over 10 lines of code        
 
-# Game Facade, but what game are we playing?
-
-# what server?
 class SocketMannager:
-    # the constructor is over 10 lines of code
     def __init__(self):
         self.users=[]
         self.threads=[]

@@ -63,11 +63,9 @@ class FacadeSubmarinGame:
 
 
 
-    # using connection objects is not hiding 3d-party code like sockets -> moved to IAction
 
 
 
-    # this function is over 10 lines of code
     def playonevsone(self,sock,shiplist,sock2,shiplist2):
         print("\n \n",shiplist,shiplist2)
         while len(shiplist)!=0 and len(shiplist2)!=0:
@@ -78,7 +76,7 @@ class FacadeSubmarinGame:
         self.changestatusendgame(self.player2_idx,self.player_idx)
 
 
-    # the function doesnt contain a verb
+ 
     def changestatusendgame(self,index,index2):
         self.prematch.changestatusendgame(index,index2)
 
@@ -113,7 +111,7 @@ class FacadeSubmarinGame:
         return False
 
 
-    # decoding and encoding are low level abstraction
+
     def sendaction(self,conn,action):
         encodeaction=pickle.dumps(action)
         conn.send(encodeaction)

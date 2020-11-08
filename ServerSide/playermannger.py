@@ -27,7 +27,7 @@ class PlayerMannger:
 
 
 
-  # decoding and encoding are low level abstraction
+
 
     def sendaction(sel,conn,action):
         encodeaction=pickle.dumps(action)
@@ -36,9 +36,6 @@ class PlayerMannger:
 
 
 
-    # watch levels of abstractions in this code
-
-    # decoding and encoding are low level abstraction
                     
     def recv_option(self,sock):
         while True:

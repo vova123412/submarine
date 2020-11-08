@@ -10,10 +10,9 @@ class Ship(Label):
         self.minheitght=5
         self.width=width
         self.height=height
-        self.ship=Label(frame,width=width,height=height,bg="green")
+        self.ship=Label(frame,text="ship",width=width,height=height,bg="green")
         self.ship.grid(row=1,column=1)
         self.make_draggable(self.ship)
-
 
 
     def stopdrag(self):
@@ -62,8 +61,6 @@ class Ship(Label):
         self.y = widget.winfo_y() - widget._drag_start_y + event.y    
     
         if self.x<=(460-(self.width/self.minwidth-1)*50) and int(self.x/50)>0 and self.y<=(460-(self.height/self.minheitght-1)*50) and int(self.y/50)>0:
-
-
             print(f'x {self.x/50:} y: {self.y/50:}')
             shiplist=self.getcoordinate()
             for i in shiplist:

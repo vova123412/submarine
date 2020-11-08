@@ -10,7 +10,7 @@ class SubmarinGame:
 
     def Actions_loop(self):
         while True:
-            action_strategy=pickle.loads(self.sock.recv(1024))     # recv what?   action
+            action_strategy=pickle.loads(self.sock.recv(1024))   
             if action_strategy.do_action(self.sock,self.frame)==0:
                 break
         print("SubmarinGame Over")
